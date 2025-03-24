@@ -1,14 +1,33 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import "./TitleCards.css";
 import cards_data from "../../assets/cards/Cards_data.js";
 
 const TitleCards = ({ title, category }) => {
+  const [apiData, setApiData] = useState([]);
   const cardsRef = useRef();
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization:
+        "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzNDU3ZTQzNzk3NWZjZWEyMmYwMWRiZGI3MjMyNTg0ZSIsIm5iZiI6MTc0Mjc4NDk5MS42NTc5OTk4LCJzdWIiOiI2N2UwYzlkZmU0YTljODY5MDYwODAzMDYiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.xk-sv4aHiDJjA-6gkUC_j9dUT_l0PEngBFcITDOtss8",
+    },
+  };
+
   const handleWheel = (event) => {
     event.preventDefault();
     cardsRef.current.scrollLeft += event.deltaY;
   };
   useEffect(() => {
+    fetch(
+      `https://api.themoviedb.org/3/movie/${
+        category ? category : "now_playing"
+      }?language=en-US&page=1`,
+      options
+    )
+      .then((response) => response.json())
+      .then((response) => setApiData(response.results))
+      .catch((err) => console.error(err));
     const cardList = cardsRef.current;
     cardsRef.current.addEventListener("wheel", handleWheel);
     return () => {
@@ -19,14 +38,19 @@ const TitleCards = ({ title, category }) => {
     <div className="title-cards">
       <h2>{title ? title : "Popular on Netflix"}</h2>
       <div className="card-list" ref={cardsRef}>
-        {cards_data.map((card, index) => {
-          return (
+        {apiData && apiData.length > 0 ? (
+          apiData.map((card, index) => (
             <div className="card" key={index}>
-              <img src={card.image} alt="" />
-              <p>{card.name}</p>
+              <img
+                src={`https://image.tmdb.org/t/p/w500` + card.backdrop_path}
+                alt=""
+              />
+              <p>{card.original_title}</p>
             </div>
-          );
-        })}
+          ))
+        ) : (
+          <p>Loading...</p>
+        )}
       </div>
     </div>
   );
