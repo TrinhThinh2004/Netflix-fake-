@@ -26,6 +26,8 @@
     position: absolute;
     bottom: 10px;
     right: 10px;
+    text-decoration: none;
+    color: #fff;
 }
 .card-list img:hover {
     transform: scale(1.05);
